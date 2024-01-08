@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Home
+{% endblock %}
+
+<!-- This empty div is needed to push the account nav to its correct position -->
+{% block nav %}
+<div class="col-6 col-md-6">
+
+</div>
+{% endblock %}
+
+{% block main %}
+<div class="top-padding">
+    <h1 id="project-title">Projects</h1>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+        {% block body %}
+        {% for row in projects_list %}
+        <div class="col">
+            <div class="card card-custom text-bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title">{{ row.title }}</h5>
+                </div>
+                <div class="card-body">
+                    <a href="/project/{{ row.id }}">
+                        <p class="card-text cut-text">{{ row.summary }}</p>
+                    </a>
+                </div>
+                <div class="card-footer">
+                    <!-- Modal Button - Edit Project -->
+                    <button type="button"
+                            class="btn btn-outline-secondary modal-button-edit"
+                            data-bs-toggle="modal"
+                            data-bs-target="#edit-project-modal"
+                            data-bs-edit-title="{{ row.title }}"
+                            data-bs-edit-summary="{{ row.summary }}"
+                            data-bs-project-id="{{ row.id }}">
+                        Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endblock %}
+        <!-- Modal Button - Add Project -->
+        <div class="col d-flex justify-content-center">
+            <button type="button"
+            class="btn btn-outline-secondary modal-button"
+            data-bs-toggle="modal"
+            data-bs-target="#add-project-modal">
+                +
+            </button>
+        </div>
+
+    </div>
+</div>
+<!-- Modal - Add Project -->
+<div class="modal fade" id="add-project-modal" tabindex="-1" aria-labelledby="add-project-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-bg-dark">
+            <div class="modal-header">
+                <h1 class="modal-title fs-3" id="add-project-modal-label">Add Project</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/addproject" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="project-title-input" class="form-label">Title</label>
+                        <input id="project-title-input" name="title" class="form-control text-bg-secondary" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label for="project-summary-input" class="form-label">Summary</label>
+                        <textarea id="project-summary-input" name="summary" class="form-control text-bg-secondary" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal - Edit Project -->
+<!-- Looks like I can pass in the text via Jinja syntax, using the "value" key in the tag.-->
+<div class="modal fade" id="edit-project-modal" tabindex="-1" aria-labelledby="edit-project-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-bg-dark">
+            <div class="modal-header">
+                <h1 class="modal-title fs-3" id="edit-project-modal-label">Edit Project</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/editproject/" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="project-title-input" class="form-label">Title</label>
+                        <input id="project-title-input" name="title" class="form-control text-bg-secondary" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label for="project-summary-input" class="form-label">Summary</label>
+                        <textarea id="project-summary-input" name="summary" class="form-control text-bg-secondary" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- data-bs-project-id is left empty, as the Javascript will fill in this value. -->
+                    <button id="delete-project-button" type="button" class="btn btn-danger" data-bs-project-id="">Delete</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Javascript -->
+<!--
+    To have each of the buttons pass the state for their lane, I needed to use some Javascript
+    Here are my sources:
+    https://getbootstrap.com/docs/5.3/components/modal/#varying-modal-content
+    https://www.shecodes.io/athena/115449-how-to-use-query-selector-with-an-id#:~:text=querySelector(%22%23myElement%22)%3B,that%20matches%20the%20specified%20ID
+    Here are sources for how I dynamically changed the form action:
+    https://www.javascript-coder.com/html-form/html-form-action/
+    https://stackoverflow.com/questions/70727971/dynamically-change-the-action-form-attr
+    https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+-->
+<script>
+    const editProjectModal = document.getElementById('edit-project-modal')
+    if (editProjectModal) {
+        // Here is the event listener that is listening for the button click
+        editProjectModal.addEventListener('show.bs.modal', event => {
+
+            // Here is our button
+            const button = event.relatedTarget;
+
+            // This will get the info from data-bs-* attributes
+            const title = button.getAttribute('data-bs-edit-title');
+            const summary = button.getAttribute('data-bs-edit-summary');
+            const projectId = button.getAttribute('data-bs-project-id');
+            const deleteButton = editProjectModal.querySelector('#delete-project-button');
+
+            // Make changes to the modal's content
+            const modalTitleSelect = editProjectModal.querySelector('#project-title-input');
+            const modalSummarySelect = editProjectModal.querySelector('#project-summary-input');
+            const form = editProjectModal.querySelector('form');
+
+            modalTitleSelect.value = title;
+            modalSummarySelect.value = summary;
+            form.action = `/editproject/${projectId}`;
+            // Passing the projectId to the delete button, so we target the correct project for deletion
+            deleteButton.setAttribute('data-bs-project-id', projectId);
+        });
+
+        document.getElementById('delete-project-button').addEventListener('click', function() {
+            const projectId = this.getAttribute('data-bs-project-id');
+            // Use the current url to redirect
+            window.location.href = `/deleteproject/${projectId}`;
+        });
+    }
+</script>
+{% endblock %}

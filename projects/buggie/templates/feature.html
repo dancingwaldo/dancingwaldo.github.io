@@ -1,0 +1,413 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Feature
+{% endblock %}
+
+{% block nav %}
+<!--
+    Inspired by one of the breadcrumb examples:
+    https://getbootstrap.com/docs/5.3/components/breadcrumb/
+-->
+<div class="col-6 col-md-6">
+    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-nav">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/project/{{ project_id }}">Project</a></li>
+            <li class="breadcrumb-item active" aria-current="feature">Feature</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+<!--
+    Nesting cards was a bit tricky to get right...
+    Used this as a resource:
+    https://stackoverflow.com/questions/67667887/nested-cards-fitting-cards-within-a-card-bootstrap-cards
+-->
+{% block main %}
+<div class="top-padding">
+    <h1 id="project-title">Feature: {{ feature_name }}</h1>
+    <!-- Kanban Lanes -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+        <!-- Start of Backlog Lane -->
+        <div class="col card lane text-bg-dark p-1">
+            <div class="card-header">
+                Backlog
+            </div>
+            <div class="card-body">
+                <!-- Start Content of Lanes -->
+                <div class="row">
+                    <div class="col">
+                        {% for row in bugs_list %}
+                            {% if row.state == "Backlog" %}
+                                <div class="card bug text-bg-secondary">
+                                    <div class="card-header">
+                                        {{ row.title }}
+                                    </div>
+                                    <div class="card-body">
+                                        {{ row.summary }}
+                                    </div>
+                                    <div class="card-footer">
+                                        <!-- Modal Button - Edit Feature -->
+                                        <button type="button"
+                                                class="btn btn-outline-light modal-button-edit"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#edit-bug-modal"
+                                                data-bs-edit-title="{{ row.title }}"
+                                                data-bs-edit-summary="{{ row.summary }}"
+                                                data-bs-edit-severity="{{ row.severity }}"
+                                                data-bs-edit-state="{{ row.state }}"
+                                                data-bs-feature-id="{{ row.feature_id }}"
+                                                data-bs-bug-id="{{ row.id }}">
+                                            Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <!-- Button trigger modal -->
+                        <!-- This button should select "Backlog" as its state -->
+                        <button type="button"
+                                class="btn btn-outline-secondary modal-button-kanban"
+                                data-bs-toggle="modal"
+                                data-bs-target="#add-bug-modal"
+                                data-bs-bug="Backlog">
+                            +
+                        </button>
+                    </div>
+                </div>
+                <!-- End Content of Lanes -->
+            </div>
+        </div>
+        <!-- Start of In Progress Lane -->
+        <div class="col card lane text-bg-dark p-1">
+            <div class="card-header">
+                In Progress
+            </div>
+            <div class="card-body">
+                <!-- Start Content of Lanes -->
+                <div class="row">
+                    <div class="col">
+                        {% for row in bugs_list %}
+                            {% if row.state == "In Progress" %}
+                                <div class="card bug text-bg-secondary">
+                                    <div class="card-header">
+                                        {{ row.title }}
+                                    </div>
+                                    <div class="card-body">
+                                        {{ row.summary }}
+                                    </div>
+                                    <div class="card-footer">
+                                        <!-- Modal Button - Edit Feature -->
+                                        <button type="button"
+                                                class="btn btn-outline-light modal-button-edit"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#edit-bug-modal"
+                                                data-bs-edit-title="{{ row.title }}"
+                                                data-bs-edit-summary="{{ row.summary }}"
+                                                data-bs-edit-severity="{{ row.severity }}"
+                                                data-bs-edit-state="{{ row.state }}"
+                                                data-bs-feature-id="{{ row.feature_id }}"
+                                                data-bs-bug-id="{{ row.id }}">
+                                            Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <!-- Button trigger modal -->
+                        <!-- This button should select "In Progress" as its state -->
+                        <button type="button"
+                        class="btn btn-outline-secondary modal-button-kanban"
+                        data-bs-toggle="modal"
+                        data-bs-target="#add-bug-modal"
+                        data-bs-bug="In Progress">
+                            +
+                        </button>
+                    </div>
+                </div>
+                <!-- End Content of Lanes -->
+            </div>
+        </div>
+        <!-- Start of Blocked Lane -->
+        <div class="col card lane text-bg-dark p-1">
+            <div class="card-header">
+                Blocked
+            </div>
+            <div class="card-body">
+                <!-- Start Content of Lanes -->
+                <div class="row">
+                    <div class="col">
+                        {% for row in bugs_list %}
+                            {% if row.state == "Blocked" %}
+                                <div class="card bug text-bg-secondary">
+                                    <div class="card-header">
+                                        {{ row.title }}
+                                    </div>
+                                    <div class="card-body">
+                                        {{ row.summary }}
+                                    </div>
+                                    <div class="card-footer">
+                                        <!-- Modal Button - Edit Feature -->
+                                        <button type="button"
+                                                class="btn btn-outline-light modal-button-edit"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#edit-bug-modal"
+                                                data-bs-edit-title="{{ row.title }}"
+                                                data-bs-edit-summary="{{ row.summary }}"
+                                                data-bs-edit-severity="{{ row.severity }}"
+                                                data-bs-edit-state="{{ row.state }}"
+                                                data-bs-feature-id="{{ row.feature_id }}"
+                                                data-bs-bug-id="{{ row.id }}">
+                                            Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <!-- Button trigger modal -->
+                        <!-- This button should select "Blocked" as its state -->
+                        <button type="button"
+                                class="btn btn-outline-secondary modal-button-kanban"
+                                data-bs-toggle="modal"
+                                data-bs-target="#add-bug-modal"
+                                data-bs-bug="Blocked">
+                            +
+                        </button>
+                    </div>
+                </div>
+                <!-- End Content of Lanes -->
+            </div>
+        </div>
+        <!-- Start of In Progress Lane -->
+        <div class="col card lane text-bg-dark p-1">
+            <div class="card-header">
+                Complete
+            </div>
+            <div class="card-body">
+                <!-- Start Content of Lanes -->
+                <div class="row">
+                    <div class="col">
+                        {% for row in bugs_list %}
+                            {% if row.state == "Complete" %}
+                                <div class="card bug text-bg-secondary">
+                                    <div class="card-header">
+                                        {{ row.title }}
+                                    </div>
+                                    <div class="card-body">
+                                        {{ row.summary }}
+                                    </div>
+                                    <div class="card-footer">
+                                        <!-- Modal Button - Edit Feature -->
+                                        <button type="button"
+                                                class="btn btn-outline-light modal-button-edit"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#edit-bug-modal"
+                                                data-bs-edit-title="{{ row.title }}"
+                                                data-bs-edit-summary="{{ row.summary }}"
+                                                data-bs-edit-severity="{{ row.severity }}"
+                                                data-bs-edit-state="{{ row.state }}"
+                                                data-bs-feature-id="{{ row.feature_id }}"
+                                                data-bs-bug-id="{{ row.id }}">
+                                            Edit
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <!-- Button trigger modal -->
+                        <!-- This button should select "Complete" as its state -->
+                        <button type="button"
+                                class="btn btn-outline-secondary modal-button-kanban"
+                                data-bs-toggle="modal"
+                                data-bs-target="#add-bug-modal"
+                                data-bs-bug="Complete">
+                            +
+                        </button>
+                    </div>
+                </div>
+                <!-- End Content of Lanes -->
+            </div>
+        </div>
+    </div>
+    <!-- End Kanban Lanes -->
+</div>
+<!-- Modal - Add Bug -->
+<div class="modal fade" id="add-bug-modal" tabindex="-1" aria-labelledby="add-bug-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-bg-dark">
+            <div class="modal-header">
+                <h1 class="modal-title fs-3" id="add-bug-modal-label">Add Bug</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="add-bug-form" action="/addbug/{{ feature_id }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bug-title-input-add" class="form-label">Title</label>
+                        <input id="bug-title-input-add" name="title" class="form-control text-bg-secondary" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bug-summary-input-add" class="form-label">Summary</label>
+                        <textarea id="bug-summary-input-add" name="summary" class="form-control text-bg-secondary" rows="5"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bug-severity-input" class="form-label">Severity</label>
+                        <select id="bug-severity-input" class="form-select" name="severity">
+                            <option selected>Severity</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bug-state-input" class="form-label">State</label>
+                        <select id="bug-state-input" class="form-select" name="state">
+                            <option selected>State</option>
+                            <option value="Backlog">Backlog</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Blocked">Blocked</option>
+                            <option value="Complete">Complete</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal - Edit Bug -->
+<div class="modal fade" id="edit-bug-modal" tabindex="-1" aria-labelledby="edit-bug-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-bg-dark">
+            <div class="modal-header">
+                <h1 class="modal-title fs-3" id="edit-bug-modal-label">Edit Bug</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="edit-bug-form" action="/editbug/FEATURE_ID/BUG_ID" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bug-title-input-edit" class="form-label">Title</label>
+                        <input id="bug-title-input-edit" name="title" class="form-control text-bg-secondary" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bug-summary-input-edit" class="form-label">Summary</label>
+                        <textarea id="bug-summary-input-edit" name="summary" class="form-control text-bg-secondary" rows="5"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bug-severity-input-edit" class="form-label">Severity</label>
+                        <select id="bug-severity-input-edit" class="form-select" name="severity">
+                            <option selected>Severity</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bug-state-input-edit" class="form-label">State</label>
+                        <select id="bug-state-input-edit" class="form-select" name="state">
+                            <option selected>State</option>
+                            <option value="Backlog">Backlog</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Blocked">Blocked</option>
+                            <option value="Complete">Complete</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- data-bs-project-id is left empty, as the Javascript will fill in this value. -->
+                    <button id="delete-bug-button" type="button" class="btn btn-danger" data-bs-project-id="" data-bs-feature-id="">Delete</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<!--
+    To have each of the buttons pass the state for their lane, I needed to use some Javascript
+    Here are my sources:
+    https://getbootstrap.com/docs/5.3/components/modal/#varying-modal-content
+    https://www.shecodes.io/athena/115449-how-to-use-query-selector-with-an-id#:~:text=querySelector(%22%23myElement%22)%3B,that%20matches%20the%20specified%20ID
+-->
+<script>
+    const addBugModal = document.getElementById('add-bug-modal')
+    const editBugModal = document.getElementById('edit-bug-modal')
+    if (addBugModal) {
+        // Here is the event listener that is listening for the button click
+        addBugModal.addEventListener('show.bs.modal', event => {
+
+            // Here is our target
+            const button = event.relatedTarget;
+
+            // This will get the info from data-bs-* attributes
+            const state = button.getAttribute('data-bs-bug');
+
+            // Make changes to the modal's content
+            // Select specific ids
+            const modalStateSelect = addBugModal.querySelector('#bug-state-input');
+            const form = addBugModal.querySelector('#add-bug-form');
+
+            // Assign the value we received from html attributes,
+            // To the specific ID's of the Edit Bug Modal
+            modalStateSelect.value = state;
+
+        });
+    }
+    if (editBugModal) {
+        // Here is the event listener that is listening for the button click
+        editBugModal.addEventListener('show.bs.modal', event => {
+
+            // Here is our target
+            const button = event.relatedTarget;
+
+            // This will get the info from data-bs-* attributes
+            const title = button.getAttribute('data-bs-edit-title');
+            const summary = button.getAttribute('data-bs-edit-summary');
+            const severity = button.getAttribute('data-bs-edit-severity');
+            const state = button.getAttribute('data-bs-edit-state');
+            const featureId = button.getAttribute('data-bs-feature-id');
+            const bugId = button.getAttribute('data-bs-bug-id');
+            const deleteButton = editBugModal.querySelector('#delete-bug-button');
+
+            // Make changes to the modal's content
+            // Select specific ids
+            const modalTitleSelect = editBugModal.querySelector('#bug-title-input-edit');
+            const modalSummarySelect = editBugModal.querySelector('#bug-summary-input-edit');
+            const modalSeveritySelect = editBugModal.querySelector('#bug-severity-input-edit');
+            const modalStateSelect = editBugModal.querySelector('#bug-state-input-edit');
+            const form = editBugModal.querySelector('#edit-bug-form');
+
+            // Assign the value we received from html attributes,
+            // To the specific ID's of the Edit Bug Modal
+            modalTitleSelect.value = title;
+            modalSummarySelect.value = summary;
+            modalSeveritySelect.value = severity;
+            modalStateSelect.value = state;
+
+            // This will change the placeholder action for the editfeature Modal's Form
+            form.action = `/editbug/${featureId}/${bugId}`;
+
+            // Passing the projectId to the delete button, so we target the correct project for deletion
+            deleteButton.setAttribute('data-bs-feature-id', featureId);
+            deleteButton.setAttribute('data-bs-bug-id', bugId);
+        });
+
+        document.getElementById('delete-bug-button').addEventListener('click', function() {
+            const featureId = this.getAttribute('data-bs-feature-id');
+            const bugId = this.getAttribute('data-bs-bug-id');
+            // Use the current url to redirect
+            window.location.href = `/deletebug/${featureId}/${bugId}`;
+        });
+    }
+</script>
+{% endblock %}

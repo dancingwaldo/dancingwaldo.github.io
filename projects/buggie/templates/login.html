@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Login
+{% endblock %}
+
+{% block nav %}
+<div class="col-6 col-md-6">
+
+</div>
+{% endblock %}
+
+{% block main %}
+    <div class="container text-center center-vertical">
+        <h1>Buggi:e</h1>
+        <h2 class="bottom-margin">Login</h2>
+        <form action="/login" method="post">
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text">
+            </div>
+            <div class="mb-3">
+                <!--Client Side Validation was inspired by the following documentation: https://www.accessibility-developer-guide.com/examples/forms/html-5-validations/-->
+                <input class="form-control mx-auto w-auto" id="password" name="password" placeholder="Password" type="password" required pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{12,}">
+            </div>
+            <div class="mb-3">
+                <button class="btn btn-primary" type="submit">Login</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

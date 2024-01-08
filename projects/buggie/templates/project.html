@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Project Page
+{% endblock %}
+
+{% block nav %}
+<!--
+    Inspired by one of the breadcrumb examples:
+    https://getbootstrap.com/docs/5.3/components/breadcrumb/
+-->
+<div class="col-6 col-md-6">
+    <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-nav">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="project">Project</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block main %}
+<div class="top-padding">
+    <h1 id="project-title">Features</h1>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4">
+        {% block body %}
+        {% for row in features_list %}
+        <div class="col">
+            <div class="card card-custom text-bg-dark">
+                <div class="card-header">
+                    <h5 class="card-title">{{ row.title }}</h5>
+                </div>
+                <div class="card-body">
+                    <a href="/feature/{{ row.id }}">
+                        <p class="card-text cut-text">{{ row.summary }}</p>
+                    </a>
+                </div>
+                <div class="card-footer">
+                    <!-- Modal Button - Edit Feature -->
+                    <button type="button"
+                            class="btn btn-outline-secondary modal-button-edit"
+                            data-bs-toggle="modal"
+                            data-bs-target="#edit-feature-modal"
+                            data-bs-edit-title="{{ row.title }}"
+                            data-bs-edit-summary="{{ row.summary }}"
+                            data-bs-project-id="{{ row.project_id }}"
+                            data-bs-feature-id="{{ row.id }}">
+                        Edit
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endblock %}
+        <!-- Modal Button - Add Feature -->
+        <div class="col d-flex justify-content-center">
+            <button type="button"
+                    class="btn btn-outline-secondary modal-button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#add-feature-modal">
+                +
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Modal - Add Feature -->
+<div class="modal fade" id="add-feature-modal" tabindex="-1" aria-labelledby="add-feature-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-bg-dark">
+            <div class="modal-header">
+                <h1 class="modal-title fs-3" id="add-feature-modal-label">Add Feature</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/addfeature/{{ project_id }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="feature-title-input" class="form-label">Title</label>
+                        <input id="feature-title-input" name="title" class="form-control text-bg-secondary" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label for="feature-summary-input" class="form-label">Summary</label>
+                        <textarea id="feature-summary-input" name="summary" class="form-control text-bg-secondary" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal - Edit Feature -->
+<!-- Looks like I can pass in the text via Jinja syntax, using the "value" key in the tag.-->
+<div class="modal fade" id="edit-feature-modal" tabindex="-1" aria-labelledby="edit-feature-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content text-bg-dark">
+            <div class="modal-header">
+                <h1 class="modal-title fs-3" id="edit-feature-modal-label">Edit Feature</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="edit-feature-form" action="/editfeature/PROJECT_ID/FEATURE_ID" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="feature-title-input" class="form-label">Title</label>
+                        <input id="feature-title-input" name="title" class="form-control text-bg-secondary" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label for="feature-summary-input" class="form-label">Summary</label>
+                        <textarea id="feature-summary-input" name="summary" class="form-control text-bg-secondary" rows="5"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- data-bs-project-id is left empty, as the Javascript will fill in this value. -->
+                    <button id="delete-feature-button" type="button" class="btn btn-danger" data-bs-project-id="" data-bs-feature-id="">Delete</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Javascript -->
+<!--
+    To have each of the buttons pass the state for their lane, I needed to use some Javascript
+    Here are my sources:
+    https://getbootstrap.com/docs/5.3/components/modal/#varying-modal-content
+    https://www.shecodes.io/athena/115449-how-to-use-query-selector-with-an-id#:~:text=querySelector(%22%23myElement%22)%3B,that%20matches%20the%20specified%20ID
+    Here are sources for how I dynamically changed the form action:
+    https://www.javascript-coder.com/html-form/html-form-action/
+    https://stackoverflow.com/questions/70727971/dynamically-change-the-action-form-attr
+    https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
+-->
+<script>
+    const editFeatureModal = document.getElementById('edit-feature-modal')
+    if (editFeatureModal) {
+        // Here is the event listener that is listening for the button click
+        editFeatureModal.addEventListener('show.bs.modal', event => {
+
+            // Here is our button
+            const button = event.relatedTarget;
+
+            // This will get the info from data-bs-* attributes
+            const title = button.getAttribute('data-bs-edit-title');
+            const summary = button.getAttribute('data-bs-edit-summary');
+            const projectId = button.getAttribute('data-bs-project-id');
+            const featureId = button.getAttribute('data-bs-feature-id');
+            const deleteButton = editFeatureModal.querySelector('#delete-feature-button');
+
+            // Make changes to the modal's content
+            const modalTitleSelect = editFeatureModal.querySelector('#feature-title-input');
+            const modalSummarySelect = editFeatureModal.querySelector('#feature-summary-input');
+            const form = editFeatureModal.querySelector('#edit-feature-form');
+
+            modalTitleSelect.value = title;
+            modalSummarySelect.value = summary;
+            // This will change the placeholder action for the editfeature Modal's Form
+            form.action = `/editfeature/${projectId}/${featureId}`;
+            // Passing the projectId to the delete button, so we target the correct project for deletion
+            deleteButton.setAttribute('data-bs-project-id', projectId);
+            deleteButton.setAttribute('data-bs-feature-id', featureId);
+        });
+
+        document.getElementById('delete-feature-button').addEventListener('click', function() {
+            const projectId = this.getAttribute('data-bs-project-id');
+            const featureId = this.getAttribute('data-bs-feature-id');
+            // Use the current url to redirect
+            window.location.href = `/deletefeature/${projectId}/${featureId}`;
+        });
+    }
+</script>
+{% endblock %}
